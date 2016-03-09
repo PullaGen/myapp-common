@@ -2,9 +2,8 @@
 var mongoose = require('mongoose');
 var bcrypt = require('bcrypt-nodejs');
 var Schema = mongoose.Schema;
-
 // create a schema
-var userSchema = new Schema({
+var manfSchema = new Schema({
 	name : {
 		type : String,
 		required : true
@@ -39,15 +38,12 @@ var userSchema = new Schema({
 	fax_numbers : Array,
 	verified : Boolean
 });
-//the schema is useless so far
-//we need to create a model using it
-var User = mongoose.model('USER', userSchema);
 
-userSchema.pre('save', function(callback) {
-	var user = this;
+manfSchema.pre('save', function(callback) {
+	var manf = this;
 
 	// Break out if the password hasn't changed
-	if (!user.isModified('password'))
+	if (!manf.isModified('password'))
 		return callback();
 
 	// Password changed so we need to hash it
@@ -55,16 +51,16 @@ userSchema.pre('save', function(callback) {
 		if (err)
 			return callback(err);
 
-		bcrypt.hash(user.password, salt, null, function(err, hash) {
+		bcrypt.hash(manf.password, salt, null, function(err, hash) {
 			if (err)
 				return callback(err);
-			user.password = hash;
+			manf.password = hash;
 			callback();
 		});
 	});
 });
 
-userSchema.methods.verifyPassword = function(password, cb) {
+manfSchema.methods.verifyPassword = function(password, cb) {
 	bcrypt.compare(password, this.password, function(err, isMatch) {
 		if (err)
 			return cb(err);		
@@ -72,8 +68,12 @@ userSchema.methods.verifyPassword = function(password, cb) {
 	});
 };
 
-exports.saveUsers = function(body, callback) {
-	var userObj = new User({
+//the schema is useless so far
+//we need to create a model using it
+var Manf = mongoose.model('MANF', manfSchema);
+
+exports.saveManf = function(body, callback) {		
+	var manfObj = new Manf({
 		name : body.name,
 		branch : true,
 		manf_id : body.tin,
@@ -92,19 +92,20 @@ exports.saveUsers = function(body, callback) {
 		verified : false
 	});
 
-	User.count({$or : [ {manf_id : body.tin}, {email : body.email} ]},		
+	Manf.count({$or : [ {manf_id : body.tin}, {email : body.email} ]},		
 	    function(err, count) {
+		console.log("Count::"+count);
 			if(!err){
 				if (count === 0) {
-				userObj.save(function(err) {
+				manfObj.save(function(err,res) {
 					if (err)
-						callback(err , "");
+						callback(err);
 					else {
-						callback(null,"user created");
+						callback(null, res);
 					}
 				});
 			} else
-				callback(null,"user already exists");
+				callback(null,"already exists");
 			}
 		else{
 			callback(err);
@@ -113,42 +114,53 @@ exports.saveUsers = function(body, callback) {
 };
 
 //returns the count after checking
-exports.checkUserByEmailAndPassword = function(body, callback) {
-	var isExists = false;
-	User.count({
-		email : body.username,
-		password : body.password
-	}, function(err, count) {
+exports.checkManfByEmailAndPassword = function(body, callback) {	
+	Manf.findOne({
+		email : body.username,		
+	}, function(err, manf) {
 		if(err)
 			callback(err);
 		else
 		{			
-			if(count === 1)
+			if(manf)
 			{
-				isExists = true;
-				callback(null, isExists);
-			}
-			else if(count === 0)
-			{
-				calbback(null, isExists);
-			}
+				//console.log(manf);
+				manf.verifyPassword(body.password, function(err,isMatch) {
+					if(err)
+						callback(err);
+					else if(isMatch == true)
+						callback(null, manf);
+					else if(isMatch == false)
+						callback(new Error("invalid username or password"));						
+				});								
+			}			
 			else{
-				callback(new Error("user exists more than on time"))
+				callback(new Error("invalid username or password"));
 			}
 		}
 	});
 };
 
 //returns the result set after finding
-exports.findUserById = function(userId, callback) {	 
-		User.findById(userId, function(err, result) {
+exports.findManfById = function(manfId, callback) {	 
+		User.findById(manfId, function(err, result) {
 			if(err)
 				callback(err);
 			else				
 				callback(null, result);				
 		});
 	};
-	
+
+//returns the result set after finding
+exports.findManfByTinId = function(tinId, callback) {	 
+		Manf.findOne({manf_id:tinId}, function(err, result) {
+			if(err)
+				callback(err);
+			else				
+				callback(null, result);				
+		});
+	};
+
 /*exports.updateUserById = function(userId, body, callback) {
 	User.findOne({
 		_id : userId
@@ -167,4 +179,4 @@ exports.findUserById = function(userId, callback) {
 	});
 };*/
 // make this available to our users in our Node applications
-exports.UserModel = User;
+exports.ManfModel = Manf;
