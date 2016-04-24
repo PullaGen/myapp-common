@@ -143,7 +143,7 @@ exports.checkManfByEmailAndPassword = function(body, callback) {
 
 //returns the result set after finding
 exports.findManfById = function(manfId, callback) {	 
-		User.findById(manfId, function(err, result) {
+		Manf.findById(manfId, function(err, result) {
 			if(err)
 				callback(err);
 			else				
@@ -160,7 +160,15 @@ exports.findManfByTinId = function(tinId, callback) {
 				callback(null, result);				
 		});
 	};
-
+//returns the result set after finding
+exports.findManfByEmail = function(emailId, callback) {	 
+	Manf.findOne({email:emailId}, function(err, result) {
+		if(err)
+			callback(err);
+		else				
+			callback(null, result);				
+			});
+	};
 /*exports.updateUserById = function(userId, body, callback) {
 	User.findOne({
 		_id : userId
