@@ -63,7 +63,7 @@ manfSchema.pre('save', function(callback) {
 manfSchema.methods.verifyPassword = function(password, cb) {
 	bcrypt.compare(password, this.password, function(err, isMatch) {
 		if (err)
-			return cb(err);		
+			return cb(err);
 		cb(null, isMatch);
 	});
 };
@@ -72,7 +72,7 @@ manfSchema.methods.verifyPassword = function(password, cb) {
 //we need to create a model using it
 var Manf = mongoose.model('MANF', manfSchema);
 
-exports.saveManf = function(body, callback) {		
+exports.saveManf = function(body, callback) {
 	var manfObj = new Manf({
 		name : body.name,
 		branch : true,
@@ -92,7 +92,7 @@ exports.saveManf = function(body, callback) {
 		verified : false
 	});
 
-	Manf.count({$or : [ {manf_id : body.tin}, {email : body.email} ]},		
+	Manf.count({$or : [ {manf_id : body.tin}, {email : body.email} ]},
 	    function(err, count) {
 		console.log("Count::"+count);
 			if(!err){
@@ -105,7 +105,7 @@ exports.saveManf = function(body, callback) {
 					}
 				});
 			} else
-				callback(null,"already exists");
+				callback(new Error("already exists"));
 			}
 		else{
 			callback(err);
@@ -114,14 +114,14 @@ exports.saveManf = function(body, callback) {
 };
 
 //returns the count after checking
-exports.checkManfByEmailAndPassword = function(body, callback) {	
+exports.checkManfByEmailAndPassword = function(body, callback) {
 	Manf.findOne({
-		email : body.username,		
+		email : body.username,
 	}, function(err, manf) {
 		if(err)
 			callback(err);
 		else
-		{			
+		{
 			if(manf)
 			{
 				//console.log(manf);
@@ -131,9 +131,9 @@ exports.checkManfByEmailAndPassword = function(body, callback) {
 					else if(isMatch == true)
 						callback(null, manf);
 					else if(isMatch == false)
-						callback(new Error("invalid username or password"));						
-				});								
-			}			
+						callback(new Error("invalid username or password"));
+				});
+			}
 			else{
 				callback(new Error("invalid username or password"));
 			}
@@ -142,31 +142,31 @@ exports.checkManfByEmailAndPassword = function(body, callback) {
 };
 
 //returns the result set after finding
-exports.findManfById = function(manfId, callback) {	 
+exports.findManfById = function(manfId, callback) {
 		Manf.findById(manfId, function(err, result) {
 			if(err)
 				callback(err);
-			else				
-				callback(null, result);				
+			else
+				callback(null, result);
 		});
 	};
 
 //returns the result set after finding
-exports.findManfByTinId = function(tinId, callback) {	 
+exports.findManfByTinId = function(tinId, callback) {
 		Manf.findOne({manf_id:tinId}, function(err, result) {
 			if(err)
 				callback(err);
-			else				
-				callback(null, result);				
+			else
+				callback(null, result);
 		});
 	};
 //returns the result set after finding
-exports.findManfByEmail = function(emailId, callback) {	 
+exports.findManfByEmail = function(emailId, callback) {
 	Manf.findOne({email:emailId}, function(err, result) {
 		if(err)
 			callback(err);
-		else				
-			callback(null, result);				
+		else
+			callback(null, result);
 			});
 	};
 /*exports.updateUserById = function(userId, body, callback) {

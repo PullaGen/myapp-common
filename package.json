@@ -7,9 +7,9 @@
     "test": "echo \"Error: no test specified! Configure in package.json\" && exit 1"
   },
   "repository": {
-	    "type": "git",
-	    "url": "git+https://github.com/PullaGen/myapp-common.git"
-	  },
+    "type": "git",
+    "url": "git+https://github.com/PullaGen/myapp-common.git"
+  },
   "keywords": [
     "node.js",
     "eclipse",
@@ -19,7 +19,8 @@
   "license": "MIT",
   "readmeFilename": "README.md",
   "dependencies": {
-	    "bcrypt-nodejs": "0.0.3",
-	    "mongoose": "^4.3.6"
-}
+    "bcrypt-nodejs": "0.0.3",
+    "mongoose": "^4.3.6",
+    "should": "^8.3.1"
+  }
 }
